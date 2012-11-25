@@ -23,11 +23,11 @@ xmpp.connect
 loggify = (to, message) ->
   xmpp.send from, "echo: " + message
   
-debugEntryAndExit = (what) ->
-  (callback) ->
-    console.log 'debug', "entering #{what}"
-    value = callback.apply(this, arguments)
-    console.log 'debug', "leaving #{what}"
-    value
+# debugEntryAndExit = (what) ->
+#   (callback) ->
+#     console.log 'debug', "entering #{what}"
+#     value = callback.apply(this, arguments)
+#     console.log 'debug', "leaving #{what}"
+#     value
 
-xmpp.send = debugEntryAndExit(xmpp.send)
+# xmpp.send = debugEntryAndExit(xmpp.send)
