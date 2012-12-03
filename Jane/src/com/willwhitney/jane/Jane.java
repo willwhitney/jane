@@ -15,17 +15,19 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+public class Jane extends Activity {
 
 	TextToSpeech tts;
 	public final int RECEIVED_SPEECH_CODE = 0;
 	TextView text;
 	Button speakButton;
+	public static Jane instance;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        instance = this;
 
         text = (TextView) findViewById(R.id.text);
         speakButton = (Button) findViewById(R.id.speakbutton);
@@ -87,13 +89,12 @@ public class MainActivity extends Activity {
 
     @Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-    	Log.d("Jane", "Key pressed.");
-    	if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+    	Log.d("Jane", "Key pressed: " + keyCode);
+    	if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
     		listen();
     		return true;
-    	} else {
-    		return super.onKeyDown(keyCode, event);
     	}
+    	return super.onKeyDown(keyCode, event);
     }
 
 }
