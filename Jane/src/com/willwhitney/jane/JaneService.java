@@ -19,6 +19,8 @@ import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -35,6 +37,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	ComponentName mediaButtonResponder;
 	TextToSpeech tts;
 	JaneState state = JaneState.NONE;
+	PowerManager powerManager;
+	WakeLock lock;
 	public static JaneService instance;
 
     // Unique Identification Number for the Notification.
@@ -63,6 +67,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
         am.registerMediaButtonEventReceiver(mediaButtonResponder);
+
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "JaneLock");
+        lock.acquire(10 * 60 * 1000);
+
 
 //        new XMLFetcher().execute("san francisco");
 
