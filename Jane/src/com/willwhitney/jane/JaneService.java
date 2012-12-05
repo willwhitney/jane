@@ -1,8 +1,13 @@
 package com.willwhitney.jane;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -11,6 +16,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.RecognitionListener;
@@ -58,6 +64,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
         am.registerMediaButtonEventReceiver(mediaButtonResponder);
 
+//        new XMLFetcher().execute("san francisco");
+
         return START_STICKY;
     }
 
@@ -87,6 +95,10 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
             		if (match.equals("take a note")) {
             			state = JaneState.AWAITING_NOTE;
             			speak("Go ahead, sir.");
+            			return;
+            		} else if (match.startsWith("tell me about")) {
+            			new XMLFetcher().execute(match.replaceFirst("tell me about *", ""));
+            			return;
             		}
             	}
     			break;
@@ -218,6 +230,36 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         // Send the notification.
         mNM.notify(NOTIFICATION, notification);
     }
+
+    private class XMLFetcher extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... params) {
+			try {
+				String url = new URI(
+						"http",
+						"lookup.dbpedia.org",
+						"/api/search.asmx/KeywordSearch",
+						"QueryClass=place&QueryString=" + params[0],
+						null).toASCIIString();
+//				Document d = WebClient.loadXMLFromString(
+//						WebClient.getURLContents(
+//						"http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryClass=place&QueryString=" + params[0]));
+				Document d = WebClient.loadXMLFromString(WebClient.getURLContents(url));
+				NodeList nl = d.getElementsByTagName("Description");
+				Node n = nl.item(0);
+				return n.getTextContent();
+//				Log.d("Jane", n.getTextContent());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		@Override
+		protected void onPostExecute(String description) {
+			speak(description);
+		}
+	}
 
 
 }

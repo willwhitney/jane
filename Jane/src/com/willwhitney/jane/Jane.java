@@ -40,12 +40,9 @@ public class Jane extends Activity {
 
 			@Override
 			public void onInit(int status) {
-//				speak("Hello! I'm Jane.");
-//				speak("Go fuck yourself.");
 			}
 
         });
-//        tts.setSpeechRate(0.95f);
 
         speakButton.setOnClickListener(new OnClickListener() {
 
@@ -62,14 +59,6 @@ public class Jane extends Activity {
         Log.d("Jane", "About to try to start a service...");
         Intent serviceIntent = new Intent(this, JaneService.class);
         startService(serviceIntent);
-//        IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
-//        receiver = new MediaButtonIntentReceiver();
-//        filter.setPriority(10000);
-//        registerReceiver(receiver, filter);
-
-//        am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-//        mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
-//        am.registerMediaButtonEventReceiver(mediaButtonResponder);
 
     }
 
@@ -101,6 +90,7 @@ public class Jane extends Activity {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
+
 
 //    @Override
 //	public boolean onKeyDown(int keyCode, KeyEvent event) {
