@@ -25,10 +25,7 @@
             
         </activity>
         
-        <service android:name=".JaneService">
-            <intent-filter>
-            	<action android:name="android.intent.action.MEDIA_BUTTON" />
-        	</intent-filter>
+        <service android:name=".JaneService">            
         </service>
         
 		<receiver android:name="MediaButtonIntentReceiver">
@@ -38,6 +35,4 @@
 		</receiver>
     </application>
     
-    
-
 </manifest>

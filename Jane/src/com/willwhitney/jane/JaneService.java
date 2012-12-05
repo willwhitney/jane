@@ -31,14 +31,16 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	JaneState state = JaneState.NONE;
 	public static JaneService instance;
 
-
-
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION = 19935;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+    	if (intent.hasExtra("utterance_completed")) {
+    		utteranceCompletedThreadsafe();
+    		return START_STICKY;
+    	}
     	instance = this;
         Log.i("Jane", "Received start id " + startId + ": " + intent);
         Log.d("Jane", "Service received start command.");
@@ -68,9 +70,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     public void onCreate() {
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
-        // Display a notification about us starting.  We put an icon in the status bar.
+        // Display a notification while Jane is awake.
         showNotification();
-//        listen();
     }
 
     public void speak(String words) {
@@ -100,16 +101,23 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	public void onUtteranceCompleted(String utteranceId) {
     	Log.d("Jane", "Some utterance was completed with id " + utteranceId);
     	Log.d("Jane", "I am in state " + state);
-    	listen();
-//    	switch (state) {
-//			case NONE:
-//				break;
-//			case AWAITING_NOTE:
-//				listen();
-//				break;
-//    	}
+    	Log.d("Jane", "Running startService...");
 
+    	Intent utteranceCompletedIntent = new Intent(this, JaneService.class);
+    	utteranceCompletedIntent.putExtra("utterance_completed", true);
+        startService(utteranceCompletedIntent);
 	}
+
+    public void utteranceCompletedThreadsafe() {
+    	Log.d("Jane", "Received startService in utteranceCompletedThreadsafe");
+    	switch (state) {
+			case NONE:
+				break;
+			case AWAITING_NOTE:
+				listen();
+				break;
+    	}
+    }
 
     public void listen() {
 
@@ -199,18 +207,6 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
      * Show a notification while this service is running.
      */
     private void showNotification() {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = "JaneService started!";
-
-//        // Set the icon, scrolling text and timestamp
-//        Notification notification = new Notification(R.drawable.ic_launcher, text, System.currentTimeMillis());
-//
-//        // The PendingIntent to launch our activity if the user selects this notification
-//        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, Jane.class), 0);
-//
-//        // Set the info for the views that show in the notification panel.
-//        notification.setLatestEventInfo(this, "Jane", "Ready and waiting.", contentIntent);
-
         Notification notification = new NotificationCompat.Builder(this)
         		.setSmallIcon(R.drawable.ic_launcher)
         		.setContentTitle("Jane")
