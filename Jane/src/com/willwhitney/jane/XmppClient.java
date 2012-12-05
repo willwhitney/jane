@@ -10,7 +10,7 @@ public class XmppClient extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         org.jivesoftware.smackx.ConfigureProviderManager.configureProviderManager();
-        org.jivesoftware.smackx.initStaticCode(this);
+//        org.jivesoftware.smackx.initStaticCode(this);
     }
 
     @Override

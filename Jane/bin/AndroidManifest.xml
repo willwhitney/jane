@@ -4,8 +4,12 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="15" />
+    
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET" /> 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -16,10 +20,24 @@
             android:label="Jane" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />    
             </intent-filter>
+            
         </activity>
+        
+        <service android:name=".JaneService">
+            <intent-filter>
+            	<action android:name="android.intent.action.MEDIA_BUTTON" />
+        	</intent-filter>
+        </service>
+        
+		<receiver android:name="MediaButtonIntentReceiver">
+			<intent-filter>
+				<action android:name="android.intent.action.MEDIA_BUTTON" />
+			</intent-filter>
+		</receiver>
     </application>
+    
+    
 
 </manifest>
