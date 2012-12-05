@@ -147,6 +147,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			state = JaneState.NONE;
     			break;
     	}
+    	speak("I'm sorry, I didn't understand that.");
     }
 
     @Override
@@ -304,7 +305,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		}
 		@Override
 		protected void onPostExecute(String description) {
-			speak(description);
+			if (description == null || description.trim().length() == 0) {
+				speak("I'm afraid I don't know anything about that.");
+			} else {
+				speak(description);
+			}
 		}
 	}
 
