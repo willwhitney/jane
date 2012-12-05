@@ -275,20 +275,27 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		@Override
 		protected String doInBackground(String... params) {
 			try {
+//				http://api.duckduckgo.com/?q=wikipedia%20bourbon&format=json&pretty=1
 				String url = new URI(
 						"http",
-						"lookup.dbpedia.org",
-						"/api/search.asmx/KeywordSearch",
-						"QueryClass=place&QueryString=" + params[0],
+						"api.duckduckgo.com",
+						"",
+						"format=xml&pretty=1&q=" + params[0],
 						null).toASCIIString();
-//				Document d = WebClient.loadXMLFromString(
-//						WebClient.getURLContents(
-//						"http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryClass=place&QueryString=" + params[0]));
 				Document d = WebClient.loadXMLFromString(WebClient.getURLContents(url));
-				NodeList nl = d.getElementsByTagName("Description");
+				NodeList nl = d.getElementsByTagName("Definition");
 				Node n = nl.item(0);
+//				String url = new URI(
+//						"http",
+//						"lookup.dbpedia.org",
+//						"/api/search.asmx/KeywordSearch",
+//						"QueryClass=place&QueryString=" + params[0],
+//						null).toASCIIString();
+//				Document d = WebClient.loadXMLFromString(WebClient.getURLContents(url));
+//				NodeList nl = d.getElementsByTagName("Description");
+//				Node n = nl.item(0);
+				Log.d("Jane", n.getTextContent());
 				return n.getTextContent();
-//				Log.d("Jane", n.getTextContent());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
