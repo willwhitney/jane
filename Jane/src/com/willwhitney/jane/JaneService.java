@@ -4,11 +4,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -16,6 +19,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -28,6 +32,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Toast;
 
 public class JaneService extends Service implements OnUtteranceCompletedListener {
@@ -47,6 +52,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+    	Log.d("Jane", "Intent from onStartCommand: " + intent);
     	if (intent.hasExtra("utterance_completed")) {
     		utteranceCompletedThreadsafe();
     		return START_STICKY;
@@ -113,6 +119,31 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			break;
     		case AWAITING_NOTE:
     			Log.d("Jane", "Took a note: " + matches.get(0));
+
+    			Pattern emailPattern = Patterns.EMAIL_ADDRESS; // API level 8+
+    			Account[] accounts = AccountManager.get(this).getAccounts();
+    			String possibleEmail = "";
+    			for (Account account : accounts) {
+    			    if (emailPattern.matcher(account.name).matches()) {
+    			        possibleEmail = account.name;
+    			        break;
+    			    }
+    			}
+
+    			Intent send = new Intent(Intent.ACTION_SENDTO);
+    			String uriText;
+
+    			uriText = "mailto:" + possibleEmail +
+    			          "?subject=Note from Jane" +
+    			          "&body=" + matches.get(0);
+    			uriText = uriText.replace(" ", "%20");
+    			Uri uri = Uri.parse(uriText);
+
+    			send.setData(uri);
+    			send = Intent.createChooser(send, "Send mail...");
+    			send.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    			startActivity(send);
+
     			state = JaneState.NONE;
     			break;
     	}
