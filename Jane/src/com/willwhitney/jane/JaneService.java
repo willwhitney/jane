@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 public class JaneService extends Service implements OnUtteranceCompletedListener {
     private NotificationManager mNM;
+    public static String WIKISERVER = "562b.localtunnel.com";
 	MediaButtonIntentReceiver receiver;
 	AudioManager am;
 	ComponentName mediaButtonResponder;
@@ -277,7 +278,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 			try {
 				URI uri = new URI(
 						"http",
-						"562b.localtunnel.com",
+						WIKISERVER,
 						"/" + params[0],
 						null);
 				Log.d("Jane", uri.toString());
