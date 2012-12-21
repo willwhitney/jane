@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -48,11 +49,7 @@ public class Jane extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-	    	    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-	    	            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-	    	    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Voice recognition demo!");
-	    	    startActivityForResult(intent, RECEIVED_SPEECH_CODE);
+				listen();
 			}
 		});
 
@@ -67,10 +64,9 @@ public class Jane extends Activity {
     }
 
     public void listen() {
-    	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-	    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-	    intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "I'm listening, sir.");
-	    startActivityForResult(intent, RECEIVED_SPEECH_CODE);
+		Intent listenIntent = new Intent(Jane.this, JaneService.class);
+		listenIntent.putExtra("start_listening", true);
+        startService(listenIntent);
     }
 
     @Override
@@ -92,14 +88,14 @@ public class Jane extends Activity {
     }
 
 
-//    @Override
-//	public boolean onKeyDown(int keyCode, KeyEvent event) {
-//    	Log.d("Jane", "Key pressed: " + keyCode);
-//    	if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
-//    		listen();
-//    		return true;
-//    	}
-//    	return super.onKeyDown(keyCode, event);
-//    }
+    @Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	Log.d("Jane", "Key pressed: " + keyCode);
+    	if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
+    		listen();
+    		return true;
+    	}
+    	return super.onKeyDown(keyCode, event);
+    }
 
 }

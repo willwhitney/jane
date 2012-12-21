@@ -6,10 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Notification;
@@ -55,6 +51,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     	Log.d("Jane", "Intent from onStartCommand: " + intent);
     	if (intent.hasExtra("utterance_completed")) {
     		utteranceCompletedThreadsafe();
+    		return START_STICKY;
+    	} else if (intent.hasExtra("start_listening")) {
+    		listen();
     		return START_STICKY;
     	}
     	instance = this;
@@ -145,9 +144,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			startActivity(send);
 
     			state = JaneState.NONE;
-    			break;
+    			return;
     	}
-    	speak("I'm sorry, I didn't understand that.");
+    	speak("Sorry, I didn't understand that.");
     }
 
     @Override
@@ -276,27 +275,16 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		@Override
 		protected String doInBackground(String... params) {
 			try {
-//				http://api.duckduckgo.com/?q=wikipedia%20bourbon&format=json&pretty=1
-				String url = new URI(
+				URI uri = new URI(
 						"http",
-						"api.duckduckgo.com",
-						"",
-						"format=xml&pretty=1&q=" + params[0],
-						null).toASCIIString();
-				Document d = WebClient.loadXMLFromString(WebClient.getURLContents(url));
-				NodeList nl = d.getElementsByTagName("Definition");
-				Node n = nl.item(0);
-//				String url = new URI(
-//						"http",
-//						"lookup.dbpedia.org",
-//						"/api/search.asmx/KeywordSearch",
-//						"QueryClass=place&QueryString=" + params[0],
-//						null).toASCIIString();
-//				Document d = WebClient.loadXMLFromString(WebClient.getURLContents(url));
-//				NodeList nl = d.getElementsByTagName("Description");
-//				Node n = nl.item(0);
-				Log.d("Jane", n.getTextContent());
-				return n.getTextContent();
+						"562b.localtunnel.com",
+						"/" + params[0],
+						null);
+				Log.d("Jane", uri.toString());
+				Log.d("Jane", uri.toASCIIString());
+				String result = WebClient.getURLContents(uri.toASCIIString());
+				Log.d("Jane", result);
+				return result;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -306,7 +294,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		@Override
 		protected void onPostExecute(String description) {
 			if (description == null || description.trim().length() == 0) {
-				speak("I'm afraid I don't know anything about that.");
+				speak("I don't know anything about that.");
 			} else {
 				speak(description);
 			}
