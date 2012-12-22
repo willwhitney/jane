@@ -1,14 +1,10 @@
 package com.willwhitney.jane;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,7 +15,6 @@ import android.widget.TextView;
 
 public class Jane extends Activity {
 
-	TextToSpeech tts;
 	public final int RECEIVED_SPEECH_CODE = 0;
 	TextView text;
 	Button speakButton;
@@ -27,6 +22,8 @@ public class Jane extends Activity {
 	MediaButtonIntentReceiver receiver;
 	AudioManager am;
 	ComponentName mediaButtonResponder;
+	public static String foursquareToken;
+	public static final int FOURSQUARE_FETCHER_CODE = 10;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,14 +33,6 @@ public class Jane extends Activity {
 
         text = (TextView) findViewById(R.id.text);
         speakButton = (Button) findViewById(R.id.speakbutton);
-
-        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-
-			@Override
-			public void onInit(int status) {
-			}
-
-        });
 
         speakButton.setOnClickListener(new OnClickListener() {
 
@@ -57,10 +46,9 @@ public class Jane extends Activity {
         Intent serviceIntent = new Intent(this, JaneService.class);
         startService(serviceIntent);
 
-    }
+//        Intent getFoursquareToken = new Intent(this, FoursquareKeyFetcher.class);
+//        startActivityForResult(getFoursquareToken, FOURSQUARE_FETCHER_CODE);
 
-    public void speak(String words) {
-    	tts.speak(words, TextToSpeech.QUEUE_ADD, null);
     }
 
     public void listen() {
@@ -70,14 +58,13 @@ public class Jane extends Activity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (requestCode == RECEIVED_SPEECH_CODE && resultCode == RESULT_OK) {
-            // Populate the wordsList with the String values the recognition engine thought it heard
-            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            text.setText(matches.get(0));
-            speak(matches.get(0));
-        }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	if (requestCode == FOURSQUARE_FETCHER_CODE) {
+    		if(resultCode == RESULT_OK){
+    			foursquareToken = data.getStringExtra("result");
+//    			Log.d("Jane", foursquareToken);
+    		}
+    	}
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -85,6 +72,11 @@ public class Jane extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
+    }
+
+    @Override
+    public void onDestroy() {
+    	super.onDestroy();
     }
 
 

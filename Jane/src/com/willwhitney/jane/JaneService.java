@@ -14,6 +14,8 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -29,19 +31,25 @@ import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.willwhitney.yelp.Yelp;
 
 public class JaneService extends Service implements OnUtteranceCompletedListener {
     private NotificationManager mNM;
-    public static String WIKISERVER = "562b.localtunnel.com";
+    public static String WIKISERVER = "4jkn.localtunnel.com";
 	MediaButtonIntentReceiver receiver;
 	AudioManager am;
 	ComponentName mediaButtonResponder;
-	TextToSpeech tts;
+	private TextToSpeech tts;
 	JaneState state = JaneState.NONE;
 	PowerManager powerManager;
 	WakeLock lock;
 	public static JaneService instance;
+	Yelp yelp;
+	Gson gson = new Gson();
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
@@ -50,17 +58,21 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     	Log.d("Jane", "Intent from onStartCommand: " + intent);
-    	if (intent.hasExtra("utterance_completed")) {
-    		utteranceCompletedThreadsafe();
-    		return START_STICKY;
-    	} else if (intent.hasExtra("start_listening")) {
-    		listen();
-    		return START_STICKY;
+    	if (intent != null) {
+    		if (intent.hasExtra("utterance_completed")) {
+        		utteranceCompletedThreadsafe();
+        		return START_STICKY;
+        	} else if (intent.hasExtra("start_listening")) {
+        		listen();
+        		return START_STICKY;
+        	}
     	}
+
     	instance = this;
         Log.i("Jane", "Received start id " + startId + ": " + intent);
         Log.d("Jane", "Service received start command.");
 
+        new YelpInitializer().execute();
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
 
 			@Override
@@ -79,7 +91,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         lock.acquire(10 * 60 * 1000);
 
 
-//        new XMLFetcher().execute("san francisco");
+//        System.out.println(yelp.search("", 42.0, 71.0));
 
         return START_STICKY;
     }
@@ -109,12 +121,22 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			for (String match : matches) {
             		if (match.equals("take a note")) {
             			state = JaneState.AWAITING_NOTE;
-            			speak("Go ahead, sir.");
+            			speak("Go ahead.");
             			return;
             		} else if (match.startsWith("tell me about")) {
-            			new XMLFetcher().execute(match.replaceFirst("tell me about *", ""));
+            			new WikiFetcher().execute(match.replaceFirst("tell me about *", ""));
+            			return;
+            		} else if (match.equals("what's around here") || match.equals("what is around here") ||
+            				match.equals("what's near here") || match.equals("what is near here") ||
+            				match.equals("what's nearby") || match.equals("what is nearby")) {
+            			new YelpSearcher().execute("");
             			return;
             		}
+
+            		// else if (match.equals("play") || match.equals("pause")) {
+//            			playPause();
+//            			return;
+//            		}
             	}
     			break;
     		case AWAITING_NOTE:
@@ -170,6 +192,14 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 				listen();
 				break;
     	}
+    }
+
+    public void playPause() {
+    	Intent playPauseIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+    	KeyEvent playPauseButton = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
+    	playPauseIntent.putExtra(Intent.EXTRA_KEY_EVENT, playPauseButton);
+    	Log.d("Jane", playPauseIntent.toString());
+    	sendBroadcast(playPauseIntent);
     }
 
     public void listen() {
@@ -254,6 +284,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
         // Tell the user we stopped.
         Toast.makeText(this, "Jane service stopped.", Toast.LENGTH_SHORT).show();
+        super.onDestroy();
     }
 
     /**
@@ -272,7 +303,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         mNM.notify(NOTIFICATION, notification);
     }
 
-    private class XMLFetcher extends AsyncTask<String, Void, String> {
+    private class WikiFetcher extends AsyncTask<String, Void, String> {
 		@Override
 		protected String doInBackground(String... params) {
 			try {
@@ -287,7 +318,6 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 				Log.d("Jane", result);
 				return result;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
@@ -301,6 +331,54 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 			}
 		}
 	}
+
+    private class YelpSearcher extends AsyncTask<String, Void, String> {
+		@Override
+		protected String doInBackground(String... params) {
+			if (yelp == null) {
+				Log.d("Jane", "Initializing a new Yelp inside YelpSearcher.");
+				 yelp = new Yelp("u75O1_PBhDnokFNF_mSqXQ", "_Izw_4AjCnKLhdOOcksJhdAQvpc",
+							"qAAd_MNlDka6JvpQXaUPUfH55wXkFCuS", "zZ4VPde4P6YX_BnZPVLMHhFZM2E");
+			}
+			LocationManager locManager = (LocationManager) JaneService.this.getSystemService(Context.LOCATION_SERVICE);
+			String locationProvider = LocationManager.NETWORK_PROVIDER;
+			Location loc = locManager.getLastKnownLocation(locationProvider);
+			String json = yelp.search(params[0], loc.getLatitude(), loc.getLongitude());
+			Log.d("Jane", json);
+			return json;
+		}
+		@Override
+		protected void onPostExecute(String json) {
+			YelpSearch search = gson.fromJson(json, YelpSearch.class);
+
+			String toSpeak = "";
+			int i = 0;
+			for (Business b : search.businesses) {
+				if (i > 4) {
+					break;
+				}
+				toSpeak += " " + b.name + ".";
+				i++;
+			}
+			Log.d("Jane", toSpeak);
+			speak(toSpeak);
+		}
+    }
+
+    private class YelpInitializer extends AsyncTask<Void, Void, Yelp> {
+		@Override
+		protected Yelp doInBackground(Void... params) {
+			Yelp y = new Yelp("u75O1_PBhDnokFNF_mSqXQ", "_Izw_4AjCnKLhdOOcksJhdAQvpc",
+					"qAAd_MNlDka6JvpQXaUPUfH55wXkFCuS", "zZ4VPde4P6YX_BnZPVLMHhFZM2E");
+			return y;
+		}
+		@Override
+		protected void onPostExecute(Yelp y) {
+			yelp = y;
+		}
+    }
+
+
 
 
 }

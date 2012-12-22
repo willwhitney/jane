@@ -28,12 +28,10 @@ public class WebClient {
 		    URLConnection conn = target.openConnection();
 		    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-
 		    String inputLine;
 		    String output = "";
 		    while ((inputLine = in.readLine()) != null) {
 		        output += inputLine;
-
 		    }
 		    in.close();
 

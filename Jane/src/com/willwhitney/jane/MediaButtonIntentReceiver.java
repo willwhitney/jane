@@ -3,11 +3,11 @@ package com.willwhitney.jane;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
 
 public class MediaButtonIntentReceiver extends BroadcastReceiver {
-
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -18,9 +18,10 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver {
 	        return;
 	    }
 	    KeyEvent event = (KeyEvent)intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-	    if (event == null) {
+	    if (event == null || event.getKeyCode() != KeyEvent.KEYCODE_HEADSETHOOK) {
 	        return;
 	    }
+	    Log.d("Jane", event.toString());
 	    int action = event.getAction();
 	    if (action == KeyEvent.ACTION_DOWN) {
 	    	JaneService.instance.listen();
