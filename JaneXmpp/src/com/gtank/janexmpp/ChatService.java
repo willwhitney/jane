@@ -8,6 +8,7 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -51,13 +52,14 @@ public class ChatService extends Service {
 		
 		this.connection = connection;
 		
-		connection.addPacketListener(new ChatMessageListener(this), 
+		connection.addPacketListener(new ChatMessageListener(), 
 				new PacketTypeFilter(org.jivesoftware.smack.packet.Message.class));
 		
 		sendHelloMsg();
 	}
 	
-	private void sendHelloMsg() {		
+	private void sendHelloMsg() {	
+		MainActivity.localBroadcastManager.registerReceiver(new TestChatReceiver(), new IntentFilter("android.content.Intent.ACTION_SEND"));
 		Chat chat = connection.getChatManager().createChat("george.tankersley@gmail.com", new MessageListener() {
 		    public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
 		        Log.i("Chat", "Received message: " + message.getBody());
