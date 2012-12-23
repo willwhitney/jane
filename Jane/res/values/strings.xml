@@ -4,5 +4,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="button_label">Login</string>
+    <string name="chat_service_name">JaneChatService</string>
 
 </resources>

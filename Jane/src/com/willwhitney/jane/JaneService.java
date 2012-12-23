@@ -103,10 +103,10 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     @Override
     public void onCreate() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        //mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
         // Display a notification while Jane is awake.
-        showNotification();
+        //showNotification();
     }
 
     public void speak(String words) {
