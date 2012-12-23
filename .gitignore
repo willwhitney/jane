@@ -1,4 +1,4 @@
 node_modules
-*bin/
-*gen/
+Jane/bin/
+Jane/gen/
 *.DS_Store*
