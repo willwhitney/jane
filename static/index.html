@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+    
+    
+    <script type="text/javascript" src="/static/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/purl.js"></script>
+    
+    <script>
+      $(function() {
+        // console.log($.url().fparam("access_token"));
+        console.log("/foursquare_reg?foursquare_token=" + $.url().fparam("access_token"));
+        $.get("/foursquare_reg?foursquare_token=" + $.url().fparam("access_token"), function() {
+          console.log("Closing.");
+          // close();
+          window.open('', '_self', '');
+          window.close(); 
+        });
+      })
+      
+      
+    </script>
+</body>
+</html>

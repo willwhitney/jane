@@ -1,8 +1,12 @@
 {
-	"name": "jane",
-	"version": "0.0.1",
-	"dependencies": {
-		"simple-xmpp": ">= 0.1.6",
-		"express": ">= 3.0"
-	}
+  "name": "jane-node-server",
+  "version": "0.0.1",
+  "dependencies": {
+    "coffee-script": ">= 1.1.2",
+    "express": ">= 3.0"
+  },
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  }
 }
