@@ -32,12 +32,18 @@
             android:label="Authenticate Foursquare" >           
         </activity>
         
-        <service android:name=".JaneService">            
+        <service android:name=".JaneService">    
+            <intent-filter>
+                <action android:name="jane.xmpp.NEW_MESSAGE" />
+            </intent-filter>        
         </service>
         
        	<service
             android:name=".ChatService"
             android:label="@string/chat_service_name">
+            <intent-filter>
+                <action android:name="jane.xmpp.CHAT_RESPONSE" />
+            </intent-filter>
         </service>
         
 		<receiver android:name="MediaButtonIntentReceiver">

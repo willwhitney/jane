@@ -18,9 +18,16 @@ public class ChatService extends Service {
 	
 	public final static int LOGIN_FAILED = 0;
 	public final static int LOGIN_SUCCESSFUL = 1;
-	
+	public final static String NEW_MESSAGE = "jane.xmpp.NEW_MESSAGE";
+	public final static String NEW_CHAT = "jane.xmpp.NEW_CHAT";
+	public final static String CHAT_RESPONSE = "jane.xmpp.CHAT_RESPONSE";
+		
 	private Messenger uiMessenger;
 	private XMPPConnection connection;
+	
+	private ChatServiceListener chatServiceListener;
+	
+	protected Chat activeChat;
 
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -51,28 +58,15 @@ public class ChatService extends Service {
 		}
 		
 		this.connection = connection;
+		activeChat = null;
+		chatServiceListener = new ChatServiceListener(this);
 		
-		connection.addPacketListener(new ChatMessageListener(), 
-				new PacketTypeFilter(org.jivesoftware.smack.packet.Message.class));
+		connection.getChatManager().addChatListener(chatServiceListener);
 		
-		JaneService.localBroadcastManager.registerReceiver(JaneService.localChatReceiver, new IntentFilter("android.content.Intent.ACTION_SEND"));
-		
-		//sendHelloMsg();
-	}
-	
-	private void sendHelloMsg() {	
-		//JaneService.localBroadcastManager.registerReceiver(new ChatReceiver(/*JaneService*/), new IntentFilter("android.content.Intent.ACTION_SEND"));
-		Chat chat = connection.getChatManager().createChat("george.tankersley@gmail.com", new MessageListener() {
-		    public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
-		        Log.i("Chat", "Received message: " + message.getBody());
-		    }
-		});
-		
-		try {
-			chat.sendMessage("Hello, world");
-		} catch (XMPPException e) {
-			e.printStackTrace();
-		}
+		JaneService.localBroadcastManager.registerReceiver(JaneService.localChatReceiver, 
+				new IntentFilter(NEW_MESSAGE));	
+		JaneService.localBroadcastManager.registerReceiver(chatServiceListener,
+				new IntentFilter(CHAT_RESPONSE));
 	}
 
 }

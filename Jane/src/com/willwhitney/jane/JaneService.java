@@ -139,6 +139,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
             				match.equals("what's nearby") || match.equals("what is nearby")) {
             			new YelpSearcher().execute("");
             			return;
+            		} else if (match.equals("chat")) {
+            			state = JaneState.CHATTING;
+            			return;
             		}
 
             		// else if (match.equals("play") || match.equals("pause")) {
@@ -175,6 +178,16 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			startActivity(send);
 
     			state = JaneState.NONE;
+    			return;
+    		case CHATTING:
+    			String response = matches.get(0);
+    			if(response.contains("bye")) {
+    				state = JaneState.NONE;
+    			} else {
+    				Intent chat = new Intent(ChatService.CHAT_RESPONSE);
+    				chat.putExtra("response", response);
+    				localBroadcastManager.sendBroadcast(chat);
+    			}
     			return;
     	}
     	speak("Sorry, I didn't understand that.");
