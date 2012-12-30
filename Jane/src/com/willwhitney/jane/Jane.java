@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,7 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class Jane extends Activity implements OnClickListener {
+public class Jane extends Activity {
 
 	public final int RECEIVED_SPEECH_CODE = 0;
 	Button speakButton;
@@ -31,7 +30,6 @@ public class Jane extends Activity implements OnClickListener {
 	public static final int FOURSQUARE_FETCHER_CODE = 10;
 	
 	final Messenger uiMessenger = new Messenger(new UIMessageHandler(this));
-	public static LocalBroadcastManager localBroadcastManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +37,30 @@ public class Jane extends Activity implements OnClickListener {
         
         setContentView(R.layout.activity_main);
 		Button loginButton = (Button)findViewById(R.id.buttonLogin);
-		loginButton.setOnClickListener(this);
+		loginButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View loginScreen) {
+				EditText username = (EditText)findViewById(R.id.editUsername);
+				EditText password = (EditText)findViewById(R.id.editPassword);
+				
+				username.setText("wfwhitney.test@gmail.com");
+				password.setText("willtest");
+				
+				String user = username.getText().toString();
+				String pass = password.getText().toString();
+				
+				if(user.equals("") || pass.equals("")) {
+					Toast.makeText(loginScreen.getContext(), "Please enter a username and password.", Toast.LENGTH_SHORT).show();
+					return;
+				}
+				
+				Intent startChatService = new Intent(loginScreen.getContext(), ChatService.class);
+				startChatService.putExtra("username", user);
+				startChatService.putExtra("password", pass);
+				startChatService.putExtra("messenger", uiMessenger);
+				startService(startChatService);				
+			}
+		});
 		
         instance = this;
 
@@ -52,8 +73,6 @@ public class Jane extends Activity implements OnClickListener {
 				listen();
 			}
 		});
-        
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         Log.d("Jane", "About to try to start a service...");
         Intent serviceIntent = new Intent(this, JaneService.class);
@@ -102,27 +121,6 @@ public class Jane extends Activity implements OnClickListener {
     	}
     	return super.onKeyDown(keyCode, event);
     }
-    
-	@Override
-	public void onClick(View loginScreen) {
-		EditText username = (EditText)findViewById(R.id.editUsername);
-		EditText password = (EditText)findViewById(R.id.editPassword);
-		username.setText("wfwhitney.test@gmail.com");
-		password.setText("willtest");
-		String user = username.getText().toString();
-		String pass = password.getText().toString();
-		
-		if(user.equals("") || pass.equals("")) {
-			Toast.makeText(this, "Please enter a username and password.", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		
-		Intent startChatService = new Intent(this, ChatService.class);
-		startChatService.putExtra("username", user);
-		startChatService.putExtra("password", pass);
-		startChatService.putExtra("messenger", uiMessenger);
-		startService(startChatService);				
-	}
     
 	private static class UIMessageHandler extends Handler {
 		private Context context;

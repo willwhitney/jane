@@ -14,7 +14,7 @@ public class ChatMessageListener implements PacketListener {
 		String body = msg.getBody();
 		Intent intent = new Intent("android.content.Intent.ACTION_SEND");
 		intent.putExtra("xmppchat", body);
-		Jane.localBroadcastManager.sendBroadcast(intent);
+		JaneService.localBroadcastManager.sendBroadcast(intent);
 	}
 
 }

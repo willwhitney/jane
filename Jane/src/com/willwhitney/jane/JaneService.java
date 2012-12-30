@@ -11,6 +11,7 @@ import android.accounts.AccountManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -50,6 +52,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	public static JaneService instance;
 	Yelp yelp;
 	Gson gson = new Gson();
+	
+	public static LocalBroadcastManager localBroadcastManager;
+	public static BroadcastReceiver localChatReceiver;
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
@@ -89,6 +94,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         lock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "JaneLock");
         lock.acquire(10 * 60 * 1000);
+        
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        localChatReceiver = new ChatReceiver(this); 
 
 
 //        System.out.println(yelp.search("", 42.0, 71.0));

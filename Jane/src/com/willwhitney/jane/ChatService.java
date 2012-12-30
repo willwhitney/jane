@@ -55,11 +55,13 @@ public class ChatService extends Service {
 		connection.addPacketListener(new ChatMessageListener(), 
 				new PacketTypeFilter(org.jivesoftware.smack.packet.Message.class));
 		
-		sendHelloMsg();
+		JaneService.localBroadcastManager.registerReceiver(JaneService.localChatReceiver, new IntentFilter("android.content.Intent.ACTION_SEND"));
+		
+		//sendHelloMsg();
 	}
 	
 	private void sendHelloMsg() {	
-		Jane.localBroadcastManager.registerReceiver(new TestChatReceiver(), new IntentFilter("android.content.Intent.ACTION_SEND"));
+		//JaneService.localBroadcastManager.registerReceiver(new ChatReceiver(/*JaneService*/), new IntentFilter("android.content.Intent.ACTION_SEND"));
 		Chat chat = connection.getChatManager().createChat("george.tankersley@gmail.com", new MessageListener() {
 		    public void processMessage(Chat chat, org.jivesoftware.smack.packet.Message message) {
 		        Log.i("Chat", "Received message: " + message.getBody());
