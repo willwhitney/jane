@@ -188,6 +188,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     					String name = response.split(" ")[1];
     					Intent newActive = new Intent(ChatService.SET_ACTIVE_CHAT);
     					newActive.putExtra("name", name);
+    					localBroadcastManager.sendBroadcast(newActive);
         				response = response.substring(5 + name.length());
     				}
     				Intent chat = new Intent(ChatService.CHAT_RESPONSE);

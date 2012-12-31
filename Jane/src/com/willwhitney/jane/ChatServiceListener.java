@@ -21,12 +21,13 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 
 	@Override
 	public void chatCreated(Chat chat, boolean local) {		
-		if(service.activeChat == null) { //TODO: better logic
+		if(service.activeChat == null) {
 			service.activeChat = chat;
 			Log.i("Chat", "New active chat with " + chat.getParticipant());
-			Intent newChat = new Intent(ChatService.NEW_CHAT);
+			
+			/*Intent newChat = new Intent(ChatService.NEW_CHAT);
 			newChat.putExtra("participant", chat.getParticipant());
-			sendLocalIntent(newChat);
+			sendLocalIntent(newChat);*/
 		
 			chat.addMessageListener(this);
 		}
