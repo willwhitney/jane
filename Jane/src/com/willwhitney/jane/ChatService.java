@@ -1,10 +1,12 @@
 package com.willwhitney.jane;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.PacketTypeFilter;
 
 import android.app.Service;
 import android.content.Intent;
@@ -20,12 +22,14 @@ public class ChatService extends Service {
 	public final static int LOGIN_SUCCESSFUL = 1;
 	public final static String NEW_MESSAGE = "jane.xmpp.NEW_MESSAGE";
 	public final static String NEW_CHAT = "jane.xmpp.NEW_CHAT";
+	public final static String SET_ACTIVE_CHAT = "jane.xmpp.SET_ACTIVE_CHAT";
 	public final static String CHAT_RESPONSE = "jane.xmpp.CHAT_RESPONSE";
 		
 	private Messenger uiMessenger;
 	private XMPPConnection connection;
 	
 	private ChatServiceListener chatServiceListener;
+	private Map<String, String> nameCache;
 	
 	protected Chat activeChat;
 
@@ -41,6 +45,8 @@ public class ChatService extends Service {
 		String username = intent.getExtras().getString("username");
 		String password = intent.getExtras().getString("password");
 		uiMessenger = intent.getExtras().getParcelable("messenger");
+		
+		nameCache = new HashMap<String, String>();
 		
 		org.jivesoftware.smack.SmackAndroid.init(this);		
 		
@@ -67,6 +73,29 @@ public class ChatService extends Service {
 				new IntentFilter(NEW_MESSAGE));	
 		JaneService.localBroadcastManager.registerReceiver(chatServiceListener,
 				new IntentFilter(CHAT_RESPONSE));
+		JaneService.localBroadcastManager.registerReceiver(chatServiceListener,
+				new IntentFilter(SET_ACTIVE_CHAT));
+	}
+	
+	public void setActiveChatByName(String name) {
+		
+	}
+	
+	public String getNameForEmail(String email) {
+		Log.i("Chat", "Getting name for " + email);
+		if(nameCache.containsKey(email)) {
+			return nameCache.get(email);
+		} else {
+			Roster roster = connection.getRoster();
+			for(RosterEntry entry : roster.getEntries()) {
+				if(entry.getUser().equals(email)) {
+					String name = entry.getName();
+					nameCache.put(email, name);
+					return name;
+				}
+			}
+			return email;
+		}
 	}
 
 }

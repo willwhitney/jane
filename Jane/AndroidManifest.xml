@@ -44,6 +44,9 @@
             <intent-filter>
                 <action android:name="jane.xmpp.CHAT_RESPONSE" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="jane.xmpp.SET_ACTIVE_CHAT" />
+            </intent-filter>
         </service>
         
 		<receiver android:name="MediaButtonIntentReceiver">

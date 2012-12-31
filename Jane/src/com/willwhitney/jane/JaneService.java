@@ -181,9 +181,15 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     			return;
     		case CHATTING:
     			String response = matches.get(0);
-    			if(response.contains("bye")) {
+    			if(response.equals("bye")) {
     				state = JaneState.NONE;
     			} else {
+    				if(response.startsWith("tell")) { //tell foo message message message
+    					String name = response.split(" ")[1];
+    					Intent newActive = new Intent(ChatService.SET_ACTIVE_CHAT);
+    					newActive.putExtra("name", name);
+        				response = response.substring(5 + name.length());
+    				}
     				Intent chat = new Intent(ChatService.CHAT_RESPONSE);
     				chat.putExtra("response", response);
     				localBroadcastManager.sendBroadcast(chat);
@@ -211,6 +217,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 				break;
 			case AWAITING_NOTE:
 				listen();
+				break;
+			case CHATTING:
 				break;
     	}
     }
