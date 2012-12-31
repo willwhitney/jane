@@ -78,7 +78,12 @@ public class ChatService extends Service {
 	}
 	
 	public void setActiveChatByName(String name) {
-		
+		Roster roster = connection.getRoster();
+		for(RosterEntry entry : roster.getEntries()) {
+			if(entry.getName().startsWith(name)) {
+				activeChat = connection.getChatManager().createChat(entry.getUser(), null);
+			}
+		}
 	}
 	
 	public String getNameForEmail(String email) {
