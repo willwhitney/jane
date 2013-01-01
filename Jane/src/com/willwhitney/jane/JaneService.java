@@ -185,7 +185,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     				state = JaneState.NONE;
     			} else {
     				if(response.startsWith("tell")) { //tell foo message message message
-    					String name = response.split(" ")[1];
+    					String name = response.split(" ")[1].toLowerCase();
     					Intent newActive = new Intent(ChatService.SET_ACTIVE_CHAT);
     					newActive.putExtra("name", name);
     					localBroadcastManager.sendBroadcast(newActive);

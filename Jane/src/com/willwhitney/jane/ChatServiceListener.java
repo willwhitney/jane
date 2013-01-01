@@ -24,13 +24,13 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 		if(service.activeChat == null) {
 			service.activeChat = chat;
 			Log.i("Chat", "New active chat with " + chat.getParticipant());
+		}
 			
 			/*Intent newChat = new Intent(ChatService.NEW_CHAT);
 			newChat.putExtra("participant", chat.getParticipant());
 			sendLocalIntent(newChat);*/
 		
-			chat.addMessageListener(this);
-		}
+		chat.addMessageListener(this);
 	}
 
 	@Override
@@ -46,7 +46,10 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 				sendLocalIntent(newMessage);
 			}			
 		} else {
-			String interruptName = service.getNameForEmail(chat.getParticipant());
+			String interruptEmail = chat.getParticipant();
+			interruptEmail = interruptEmail.substring(0, interruptEmail.indexOf("/"));
+			
+			String interruptName = service.getNameForEmail(interruptEmail);
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(interruptName);
@@ -76,7 +79,7 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 		} else if(type.equals(ChatService.CHAT_RESPONSE)) {
 			String response = intent.getExtras().getString("response");
 			try {
-				Log.i("Chat", "Sending message: " + response);
+				Log.i("Chat", "Sending message to " + service.activeChat.getParticipant() + ": " + response);
 				service.activeChat.sendMessage(response);
 			} catch (XMPPException e) {
 				e.printStackTrace();

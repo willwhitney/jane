@@ -77,11 +77,19 @@ public class ChatService extends Service {
 				new IntentFilter(SET_ACTIVE_CHAT));
 	}
 	
+	//TODO: figure out what determines the presence of a RosterEntry's name field
+	//TODO: Intent-based race condition. probably shouldn't send message if "tell X" fails
 	public void setActiveChatByName(String name) {
 		Roster roster = connection.getRoster();
 		for(RosterEntry entry : roster.getEntries()) {
-			if(entry.getName().startsWith(name)) {
+			String potentialName = entry.getName();
+			Log.i("Chat", "Searching for new Active " + name + "," + potentialName);
+			if(potentialName != null && potentialName.regionMatches(true, 0, name, 0, name.length())) {
 				activeChat = connection.getChatManager().createChat(entry.getUser(), null);
+				return;
+			} else if(entry.getUser().contains(name)) { //maybe emails will be ok...
+				activeChat = connection.getChatManager().createChat(entry.getUser(), null);
+				return;
 			}
 		}
 	}
@@ -93,10 +101,16 @@ public class ChatService extends Service {
 		} else {
 			Roster roster = connection.getRoster();
 			for(RosterEntry entry : roster.getEntries()) {
+				Log.i("Chat", entry.getUser() + "," + entry.getName());
 				if(entry.getUser().equals(email)) {
 					String name = entry.getName();
-					nameCache.put(email, name);
-					return name;
+					Log.i("Chat", "Got name for " + email + " as " + name);
+					if(name == null || name.equals("")) {
+						return email;
+					} else {
+						nameCache.put(email, name);
+						return name;
+					}
 				}
 			}
 			return email;
