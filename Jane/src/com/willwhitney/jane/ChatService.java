@@ -1,21 +1,9 @@
 package com.willwhitney.jane;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.XMPPConnection;
-
-import android.app.Service;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.IBinder;
-import android.os.Messenger;
-import android.os.RemoteException;
-import android.util.Log;
-
+/*
+---------------------------------------------------------------
+--------------------- DEPRECATED ------------------------------
+---------------------------------------------------------------
 public class ChatService extends Service {
 
 	public final static int LOGIN_FAILED = 0;
@@ -118,5 +106,5 @@ public class ChatService extends Service {
 			return email;
 		}
 	}
-
 }
+*/
