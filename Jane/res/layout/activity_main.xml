@@ -6,51 +6,51 @@
     <Button
         android:id="@+id/speakbutton"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" 
+        android:text="Start listening" 
+        android:layout_margin="20dp"/>
     
-        <EditText
-        android:id="@+id/editPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editUsername"
-        android:layout_below="@+id/editUsername"
-        android:layout_marginTop="14dp"
-        android:ems="10"
-        android:inputType="textPassword" />
-
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/username_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editUsername"
-        android:layout_alignBottom="@+id/editUsername"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="15dp"
+		android:layout_below="@+id/speakbutton"
+        android:layout_margin="15dp"
         android:text="@string/username" />
-    
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/editPassword"
-        android:layout_alignBottom="@+id/editPassword"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="15dp"
-        android:text="@string/password" />
 
     <EditText
-        android:id="@+id/editUsername"
-        android:layout_width="wrap_content"
+        android:id="@+id/username_input"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="38dp"
-        android:ems="10"
+        android:layout_alignBaseline="@+id/username_label"
+        android:layout_toRightOf="@+id/password_label"        
+		android:layout_margin="15dp"
+		android:layout_marginLeft="0dp"
         android:inputType="textEmailAddress" >
 
         <requestFocus />
     </EditText>
-
+        
+    <TextView
+        android:id="@+id/password_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/username_label"
+        android:layout_margin="15dp"
+        android:text="@string/password" />
+    
+    <EditText
+        android:id="@+id/password_input"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/password_label"
+        android:layout_toRightOf="@+id/password_label"        
+        android:layout_margin="15dp"
+        android:layout_marginLeft="0dp"
+        android:inputType="textPassword" />
+    
     <Button
         android:id="@+id/buttonLogin"
         android:layout_width="wrap_content"

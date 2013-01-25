@@ -124,6 +124,14 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     public void loginCallback(android.os.Message result, XMPPConnection connection) {
 		try {
+			switch(result.what) {
+			case JaneService.LOGIN_FAILED:
+				speak("Login failed.");
+				break;
+			case JaneService.LOGIN_SUCCESSFUL:
+				speak("Login successful..");
+				break;
+			}
 			uiMessenger.send(result);
 		} catch (RemoteException re) {
 			re.printStackTrace();

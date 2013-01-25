@@ -40,8 +40,8 @@ public class Jane extends Activity {
 		loginButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View loginScreen) {
-				EditText username = (EditText)findViewById(R.id.editUsername);
-				EditText password = (EditText)findViewById(R.id.editPassword);
+				EditText username = (EditText)findViewById(R.id.username_input);
+				EditText password = (EditText)findViewById(R.id.password_input);
 
 				username.setText("wfwhitney.test@gmail.com");
 				password.setText("willtest");
@@ -91,12 +91,12 @@ public class Jane extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	if (requestCode == FOURSQUARE_FETCHER_CODE) {
-    		if(resultCode == RESULT_OK){
-    			foursquareToken = data.getStringExtra("result");
-//    			Log.d("Jane", foursquareToken);
-    		}
-    	}
+//    	if (requestCode == FOURSQUARE_FETCHER_CODE) {
+//    		if(resultCode == RESULT_OK){
+//    			foursquareToken = data.getStringExtra("result");
+////    			Log.d("Jane", foursquareToken);
+//    		}
+//    	}
         super.onActivityResult(requestCode, resultCode, data);
     }
 
