@@ -1,0 +1,7 @@
+BUGS
+fix active chat switching race condition
+store Chat objects on target switch rather than discarding
+tweak behavior of pre-chat notification
+
+FEATURES
+create a sign out button
