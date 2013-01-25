@@ -1,6 +1,6 @@
 # Jane
 
-Jane is an intelligent voice assistant for Android.
+Jane is a purely voice-based chat client for Android.
 
 ## Usage
 
@@ -10,6 +10,6 @@ If you have the app in the foreground, you can use one of the phone's volume but
 
 ### Commands
 
-- If you say `tell me about <x>`, Jane will read you a brief summary of the topic. **WARNING:** the Wikipedia scraper that powers this is currently running off my (Will's) computer via [localtunnel](http://progrium.com/localtunnel/). If mine's off, you can run your own from the `go-wikipedia-scraper` folder and change the constant in JaneService. Requires [goquery](https://github.com/PuerkitoBio/goquery). At some point this will probably be running on an EC2 instance, or just ported to Node and run on Heroku.
+- When you say `talk to <name>`, Jane changes the currently active conversation to that person, or tells you if she can't find anyone by that name.
 
-- If you say `take a note`, Jane will tell you when she's ready, then transcribe your statement and put it in a new email draft addressed to you.
+- When you say anything else, Jane sends what you say to the currently active conversation.

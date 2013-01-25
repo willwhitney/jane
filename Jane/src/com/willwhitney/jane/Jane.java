@@ -28,13 +28,13 @@ public class Jane extends Activity {
 	ComponentName mediaButtonResponder;
 	public static String foursquareToken;
 	public static final int FOURSQUARE_FETCHER_CODE = 10;
-	
+
 	final Messenger uiMessenger = new Messenger(new UIMessageHandler(this));
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.activity_main);
 		Button loginButton = (Button)findViewById(R.id.buttonLogin);
 		loginButton.setOnClickListener(new OnClickListener() {
@@ -42,26 +42,26 @@ public class Jane extends Activity {
 			public void onClick(View loginScreen) {
 				EditText username = (EditText)findViewById(R.id.editUsername);
 				EditText password = (EditText)findViewById(R.id.editPassword);
-				
+
 				username.setText("wfwhitney.test@gmail.com");
 				password.setText("willtest");
-				
+
 				String user = username.getText().toString();
 				String pass = password.getText().toString();
-				
+
 				if(user.equals("") || pass.equals("")) {
 					Toast.makeText(loginScreen.getContext(), "Please enter a username and password.", Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
-				Intent startChatService = new Intent(loginScreen.getContext(), ChatService.class);
+
+				Intent startChatService = new Intent(loginScreen.getContext(), JaneService.class);
 				startChatService.putExtra("username", user);
 				startChatService.putExtra("password", pass);
 				startChatService.putExtra("messenger", uiMessenger);
-				startService(startChatService);				
+				startService(startChatService);
 			}
 		});
-		
+
         instance = this;
 
         speakButton = (Button) findViewById(R.id.speakbutton);
@@ -74,9 +74,9 @@ public class Jane extends Activity {
 			}
 		});
 
-        Log.d("Jane", "About to try to start a service...");
-        Intent serviceIntent = new Intent(this, JaneService.class);
-        startService(serviceIntent);
+//        Log.d("Jane", "About to try to start a service...");
+//        Intent serviceIntent = new Intent(this, JaneService.class);
+//        startService(serviceIntent);
 
 //        Intent getFoursquareToken = new Intent(this, FoursquareKeyFetcher.class);
 //        startActivityForResult(getFoursquareToken, FOURSQUARE_FETCHER_CODE);
@@ -121,21 +121,21 @@ public class Jane extends Activity {
     	}
     	return super.onKeyDown(keyCode, event);
     }
-    
+
 	private static class UIMessageHandler extends Handler {
 		private Context context;
-		
+
 		public UIMessageHandler(Context c) {
 			context = c;
 		}
-		
+
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what) {
-			case ChatService.LOGIN_FAILED:
+			case JaneService.LOGIN_FAILED:
 				Toast.makeText(context, "Login failed.", Toast.LENGTH_SHORT).show();
 				break;
-			case ChatService.LOGIN_SUCCESSFUL:
+			case JaneService.LOGIN_SUCCESSFUL:
 				Toast.makeText(context, "Login successful.", Toast.LENGTH_SHORT).show();
 				break;
 			default:
