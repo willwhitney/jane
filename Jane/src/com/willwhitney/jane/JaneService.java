@@ -61,6 +61,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	public static BroadcastReceiver localChatReceiver;
 
 	protected Chat activeChat;
+	protected Map<String, Chat> chatCache;
 
 
     @Override
@@ -105,7 +106,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		uiMessenger = intent.getExtras().getParcelable("messenger");
 
 		nameCache = new HashMap<String, String>();
-
+		chatCache = new HashMap<String, Chat>();
+		
 		org.jivesoftware.smack.SmackAndroid.init(this);
 
 		LoginThread login = new LoginThread(username, password, this);
@@ -146,21 +148,36 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	}
 
 	//TODO: figure out what determines the presence of a RosterEntry's name field
-	//TODO: Intent-based race condition. probably shouldn't send message if "tell X" fails
 	public void setActiveChatByName(String name) {
 		Roster roster = connection.getRoster();
+		
+		String activeUser = activeChat.getParticipant();
+		activeUser = activeUser.substring(0, activeUser.indexOf("/"));
+		if(!chatCache.containsKey(activeUser)) {
+			chatCache.put(activeUser, activeChat);
+		}
+		
 		for(RosterEntry entry : roster.getEntries()) {
 			String potentialName = entry.getName();
+			String email = entry.getUser();
 			Log.i("Chat", "Checking desired recipient: " + name + " against: " + potentialName);
 			if(potentialName != null && potentialName.regionMatches(true, 0, name, 0, name.length())) {
 				Log.i("Chat", "Setting active chat to " + potentialName);
 				speak("Now talking to " + potentialName);
-				activeChat = connection.getChatManager().createChat(entry.getUser(), null);
+				if(chatCache.containsKey(email)) {
+					activeChat = chatCache.get(email);
+				} else {
+					activeChat = connection.getChatManager().createChat(email, null);
+				}
 				return;
-			} else if(entry.getUser().contains(name)) { //maybe emails will be ok...
-				Log.i("Chat", "Setting active chat to " + entry.getUser());
-				speak("Now talking to " + entry.getUser());
-				activeChat = connection.getChatManager().createChat(entry.getUser(), null);
+			} else if(email.contains(name)) { //maybe emails will be ok...
+				Log.i("Chat", "Setting active chat to " + email);
+				speak("Now talking to " + email);
+				if(chatCache.containsKey(email)) {
+					activeChat = chatCache.get(email);
+				} else {
+					activeChat = connection.getChatManager().createChat(email, null);
+				}
 				return;
 			}
 		}
