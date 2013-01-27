@@ -38,17 +38,6 @@
             </intent-filter>        
         </service>
         
-       	<service
-            android:name=".ChatService"
-            android:label="@string/chat_service_name">
-            <intent-filter>
-                <action android:name="jane.xmpp.CHAT_RESPONSE" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="jane.xmpp.SET_ACTIVE_CHAT" />
-            </intent-filter>
-        </service>
-        
 		<receiver android:name="MediaButtonIntentReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.MEDIA_BUTTON" />

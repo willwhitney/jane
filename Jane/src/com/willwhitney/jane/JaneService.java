@@ -49,9 +49,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	public final static int LOGIN_FAILED = 0;
 	public final static int LOGIN_SUCCESSFUL = 1;
 	public final static String NEW_MESSAGE = "jane.xmpp.NEW_MESSAGE";
-	public final static String NEW_CHAT = "jane.xmpp.NEW_CHAT";
-	public final static String SET_ACTIVE_CHAT = "jane.xmpp.SET_ACTIVE_CHAT";
-	public final static String CHAT_RESPONSE = "jane.xmpp.CHAT_RESPONSE";
+	//public final static String NEW_CHAT = "jane.xmpp.NEW_CHAT";
 
 	private Messenger uiMessenger;
 	private XMPPConnection connection;
@@ -145,10 +143,6 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 		JaneService.localBroadcastManager.registerReceiver(JaneService.localChatReceiver,
 				new IntentFilter(NEW_MESSAGE));
-		JaneService.localBroadcastManager.registerReceiver(chatServiceListener,
-				new IntentFilter(CHAT_RESPONSE));
-		JaneService.localBroadcastManager.registerReceiver(chatServiceListener,
-				new IntentFilter(SET_ACTIVE_CHAT));
 	}
 
 	//TODO: figure out what determines the presence of a RosterEntry's name field

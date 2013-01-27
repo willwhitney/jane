@@ -24,10 +24,10 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 			service.activeChat = chat;
 			Log.i("Chat", "New active chat with " + chat.getParticipant());
 		}
-
-			/*Intent newChat = new Intent(ChatService.NEW_CHAT);
-			newChat.putExtra("participant", chat.getParticipant());
-			sendLocalIntent(newChat);*/
+		
+		/*Intent newChat = new Intent(ChatService.NEW_CHAT);
+		newChat.putExtra("participant", chat.getParticipant());
+		sendLocalIntent(newChat);*/
 
 		chat.addMessageListener(this);
 	}
