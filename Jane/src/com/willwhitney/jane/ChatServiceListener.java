@@ -24,10 +24,16 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 			service.activeChat = chat;
 			Log.i("Chat", "New active chat with " + chat.getParticipant());
 		}
-		
+
 		/*Intent newChat = new Intent(ChatService.NEW_CHAT);
 		newChat.putExtra("participant", chat.getParticipant());
 		sendLocalIntent(newChat);*/
+
+//		try {
+//			chat.sendMessage("Using a dodgy voice client. Misstatements will be frequent.");
+//		} catch (XMPPException e) {
+//			Log.e("Chat", "Error sending the automatic preface message.");
+//		}
 
 		chat.addMessageListener(this);
 	}

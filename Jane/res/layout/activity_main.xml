@@ -28,7 +28,6 @@
 		android:layout_margin="15dp"
 		android:layout_marginLeft="0dp"
         android:inputType="textEmailAddress" >
-
         <requestFocus />
     </EditText>
         
@@ -58,5 +57,23 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="@string/button_label" />
+    
+    <Button
+        android:id="@+id/buttonLogout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+		android:visibility="gone"
+        android:text="Log Out" />
+    
+    <TextView
+        android:id="@+id/preface_warning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="15dp"
+        android:text="Whenever you start a conversation, Jane will first say, 'Using a dodgy voice client. Misstatements will be frequent.'" />
     
 </RelativeLayout>

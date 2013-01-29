@@ -1,10 +1,13 @@
 BUGS
 ~~fix active chat switching race condition~~
 ~~store Chat objects on target switch rather than discarding~~
-tweak behavior of pre-chat notification
+tweak behavior of pre-chat preface warning sent to contact
+blocking logic of messages received during input
 
 FEATURES
 create a sign out button
+	- Done (sort of shittily), but need to sign out of smack. Note in onStartCommand.
+		The logout logic should go in onDestroy.
 
 POTENTIAL FEATURES
 filter for nonsensical statements

@@ -36,10 +36,12 @@ public class Jane extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-		Button loginButton = (Button)findViewById(R.id.buttonLogin);
+		final Button loginButton = (Button)findViewById(R.id.buttonLogin);
+		final Button logoutButton = (Button)findViewById(R.id.buttonLogout);
 		loginButton.setOnClickListener(new OnClickListener() {
+
 			@Override
-			public void onClick(View loginScreen) {
+			public void onClick(View loginButton) {
 				EditText username = (EditText)findViewById(R.id.username_input);
 				EditText password = (EditText)findViewById(R.id.password_input);
 
@@ -50,15 +52,31 @@ public class Jane extends Activity {
 				String pass = password.getText().toString();
 
 				if(user.equals("") || pass.equals("")) {
-					Toast.makeText(loginScreen.getContext(), "Please enter a username and password.", Toast.LENGTH_SHORT).show();
+					Toast.makeText(loginButton.getContext(), "Please enter a username and password.", Toast.LENGTH_SHORT).show();
 					return;
 				}
 
-				Intent startChatService = new Intent(loginScreen.getContext(), JaneService.class);
+				Intent startChatService = new Intent(Jane.this, JaneService.class);
 				startChatService.putExtra("username", user);
 				startChatService.putExtra("password", pass);
 				startChatService.putExtra("messenger", uiMessenger);
 				startService(startChatService);
+
+				logoutButton.setVisibility(View.VISIBLE);
+				loginButton.setVisibility(View.GONE);
+			}
+		});
+
+		logoutButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View logoutButton) {
+				Intent stopJaneService = new Intent(Jane.this, JaneService.class);
+				stopJaneService.putExtra("shutdown", true);
+				startService(stopJaneService);
+
+				loginButton.setVisibility(View.VISIBLE);
+				logoutButton.setVisibility(View.GONE);
 			}
 		});
 

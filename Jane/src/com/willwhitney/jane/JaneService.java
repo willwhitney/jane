@@ -74,6 +74,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         	} else if (intent.hasExtra("start_listening")) {
         		listen();
         		return START_STICKY;
+        	} else if (intent.hasExtra("shutdown")) {
+//        		this.stopSelf();
+//        		TODO: unregister / sign out from smack. Otherwise, this error:
+//        		E/ActivityThread(21280): Service com.willwhitney.jane.JaneService has leaked IntentReceiver org.jivesoftware.smack.SmackAndroid$ConnectivtyChangedReceiver@4299f9a8 that was originally registered here. Are you missing a call to unregisterReceiver()?
+
         	}
     	}
 
@@ -107,7 +112,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 		nameCache = new HashMap<String, String>();
 		chatCache = new HashMap<String, Chat>();
-		
+
 		org.jivesoftware.smack.SmackAndroid.init(this);
 
 		LoginThread login = new LoginThread(username, password, this);
@@ -150,13 +155,22 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	//TODO: figure out what determines the presence of a RosterEntry's name field
 	public void setActiveChatByName(String name) {
 		Roster roster = connection.getRoster();
-		
-		String activeUser = activeChat.getParticipant();
-		activeUser = activeUser.substring(0, activeUser.indexOf("/"));
-		if(!chatCache.containsKey(activeUser)) {
-			chatCache.put(activeUser, activeChat);
+
+		String activeUser = null;
+		if (activeChat != null) {
+			activeUser = activeChat.getParticipant();
+			int index = activeUser.indexOf("/");
+			Log.d("Jane", "index: " + index);
+			if (index >= 0) {
+				activeUser = activeUser.substring(0, index);
+			}
+
+			if(!chatCache.containsKey(activeUser)) {
+				chatCache.put(activeUser, activeChat);
+			}
 		}
-		
+
+
 		for(RosterEntry entry : roster.getEntries()) {
 			String potentialName = entry.getName();
 			String email = entry.getUser();
