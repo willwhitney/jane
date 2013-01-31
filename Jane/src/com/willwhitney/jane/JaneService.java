@@ -161,12 +161,13 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		if (activeChat != null) {
 			activeUser = activeChat.getParticipant();
 			int index = activeUser.indexOf("/");
-			Log.d("Jane", "index: " + index);
+			//Log.d("Jane", "index: " + index);
 			if (index >= 0) {
 				activeUser = activeUser.substring(0, index);
 			}
 
 			if(!chatCache.containsKey(activeUser)) {
+				Log.d("Jane", "Caching " + activeUser);
 				chatCache.put(activeUser, activeChat);
 			}
 		}
@@ -177,11 +178,12 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 			String email = entry.getUser();
 			Log.i("Chat", "Checking desired recipient: " + name + " against: " + potentialName);
 			if(potentialName != null && potentialName.regionMatches(true, 0, name, 0, name.length())) {
-				Log.i("Chat", "Setting active chat to " + potentialName);
+				Log.i("Chat", "Setting active chat to " + potentialName + "/" + email);
 				speak("Now talking to " + potentialName);
 				if(chatCache.containsKey(email)) {
 					activeChat = chatCache.get(email);
 				} else {
+					Log.d("Chat", "Chat cache did not contain key " + email);
 					activeChat = connection.getChatManager().createChat(email, null);
 				}
 				return;

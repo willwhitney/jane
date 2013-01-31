@@ -3,6 +3,7 @@ package com.willwhitney.jane;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
 import android.content.Intent;
@@ -18,20 +19,21 @@ public class ChatServiceListener implements ChatManagerListener, MessageListener
 
 	@Override
 	public void chatCreated(Chat chat, boolean local) {
+		Log.i("Chat", "chatCreated with " + chat.getParticipant());
 		if(service.activeChat == null) {
 			service.activeChat = chat;
-			Log.i("Chat", "New active chat with " + chat.getParticipant());
+			Log.i("Chat", "Assigning active chat " + chat.getParticipant());
 		}
 
 		/*Intent newChat = new Intent(ChatService.NEW_CHAT);
 		newChat.putExtra("participant", chat.getParticipant());
 		sendLocalIntent(newChat);*/
 
-//		try {
-//			chat.sendMessage("Using a dodgy voice client. Misstatements will be frequent.");
-//		} catch (XMPPException e) {
-//			Log.e("Chat", "Error sending the automatic preface message.");
-//		}
+		try {
+			chat.sendMessage("Using a dodgy voice client. Misstatements will be frequent.");
+		} catch (XMPPException e) {
+			Log.e("Chat", "Error sending the automatic preface message.");
+		}
 
 		chat.addMessageListener(this);
 	}
