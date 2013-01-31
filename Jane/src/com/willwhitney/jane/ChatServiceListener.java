@@ -5,12 +5,10 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class ChatServiceListener extends BroadcastReceiver implements ChatManagerListener, MessageListener  {
+public class ChatServiceListener implements ChatManagerListener, MessageListener  {
 
 	private JaneService service;
 
@@ -65,30 +63,8 @@ public class ChatServiceListener extends BroadcastReceiver implements ChatManage
 		}
 	}
 
-	/*
-	 * Listening for ChatService.CHAT_RESPONSE and ChatService.SET_ACTIVE_CHAT
-	 * See ChatService.loginCallback
-	 */
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		String type = intent.getAction();
-
-//		if(type.equals(JaneService.SET_ACTIVE_CHAT)) {
-//			String name = (String)intent.getExtras().get("name");
-//			service.setActiveChatByName(name);
-//		} else if(type.equals(JaneService.CHAT_RESPONSE)) {
-//			String response = intent.getExtras().getString("response");
-//			try {
-//				Log.i("Chat", "Sending message to " + service.activeChat.getParticipant() + ": " + response);
-//				service.activeChat.sendMessage(response);
-//			} catch (XMPPException e) {
-//				e.printStackTrace();
-//			}
-//		}
-	}
-
 	private void sendLocalIntent(Intent intent) {
-		JaneService.localBroadcastManager.sendBroadcast(intent);
+		service.localBroadcastManager.sendBroadcast(intent);
 	}
 
 }

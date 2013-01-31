@@ -13,6 +13,7 @@ import org.jivesoftware.smack.XMPPException;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -57,8 +58,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	private ChatServiceListener chatServiceListener;
 	private Map<String, String> nameCache;
 
-	public static LocalBroadcastManager localBroadcastManager;
-	public static BroadcastReceiver localChatReceiver;
+	protected LocalBroadcastManager localBroadcastManager;
+	protected BroadcastReceiver localChatReceiver;
 
 	protected Chat activeChat;
 	protected Map<String, Chat> chatCache;
@@ -148,7 +149,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 		connection.getChatManager().addChatListener(chatServiceListener);
 
-		JaneService.localBroadcastManager.registerReceiver(JaneService.localChatReceiver,
+		localBroadcastManager.registerReceiver(localChatReceiver, 
 				new IntentFilter(NEW_MESSAGE));
 	}
 
@@ -359,10 +360,14 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
      * Show a notification while this service is running.
      */
     private void showNotification() {
+    	//TODO: this fixes a crash on 2.3.3 but is not correct behavior
+    	Intent dummyIntent = new Intent(this, Jane.class);
+    	PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, dummyIntent, 0);
         Notification notification = new NotificationCompat.Builder(this)
         		.setSmallIcon(R.drawable.ic_launcher)
         		.setContentTitle("Jane")
         		.setContentText("Ready and waiting.")
+        		.setContentIntent(contentIntent)
         		.setOngoing(true)
         		.build();
 

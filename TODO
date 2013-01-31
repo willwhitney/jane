@@ -8,6 +8,8 @@ FEATURES
 create a sign out button
 	- Done (sort of shittily), but need to sign out of smack. Note in onStartCommand.
 		The logout logic should go in onDestroy.
+    logout leaks receivers
+support bluetooth headset
 
 POTENTIAL FEATURES
 filter for nonsensical statements
