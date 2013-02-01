@@ -11,6 +11,10 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
+import cc.gtank.bt.Bluetooth;
+import cc.gtank.bt.Gingertooth;
+import cc.gtank.bt.ModernBluetooth;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -45,6 +50,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     private NotificationManager notificationManager;
 	private TextToSpeech tts;
+	private Bluetooth bt;
 
 	// Chat variables
 	public final static int LOGIN_FAILED = 0;
@@ -95,6 +101,17 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
         });
         tts.setOnUtteranceCompletedListener(this);
+        
+        // set up Bluetooth here
+        if(Build.VERSION.SDK_INT < 11) {
+        	bt = new Gingertooth(getApplicationContext());
+        } else {
+        	bt = new ModernBluetooth(getApplicationContext());
+        }
+        
+        boolean bt_initialized = bt.initializeHeadset();
+        	
+        Log.d("Jane", "Initialized BTHeadset: " + bt_initialized);
 
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
@@ -274,6 +291,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     }
 
     public void listen() {
+    	
+    	bt.startVoiceRecognition();
 
     	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
     	intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -284,6 +303,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     		@Override
     	    public void onResults(Bundle results) {
+    			bt.stopVoiceRecognition();
     	        ArrayList<String> voiceResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
     	        if (voiceResults == null) {
     	            Log.e("Jane", "No voice results");

@@ -1,6 +1,6 @@
 BUGS
-~~fix active chat switching race condition~~
-~~store Chat objects on target switch rather than discarding~~
+-fix active chat switching race condition
+-store Chat objects on target switch rather than discarding
 tweak behavior of pre-chat preface warning sent to contact
 blocking logic of messages received during input
 
@@ -9,7 +9,8 @@ create a sign out button
 	- Done (sort of shittily), but need to sign out of smack. Note in onStartCommand.
 		The logout logic should go in onDestroy.
     logout leaks receivers
-support bluetooth headset
+-support bluetooth headset
+respond to bluetooth headset media button
 
 POTENTIAL FEATURES
 filter for nonsensical statements
