@@ -30,7 +30,9 @@ public class ModernBluetooth implements Bluetooth {
 		        if (profile == BluetoothProfile.HEADSET) {
 		            mBluetoothHeadset = (BluetoothHeadset)proxy;
 		            // only one headset
-		            mDevice = mBluetoothHeadset.getConnectedDevices().get(0);
+		            if(mBluetoothHeadset.getConnectedDevices().size() > 0) {
+		            	mDevice = mBluetoothHeadset.getConnectedDevices().get(0);
+		            }		            
 		        }	
 			}
 			
