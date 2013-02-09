@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -49,6 +50,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	// service, voice, and notification variables
 	private final static int JANE_NOTIFICATION_CODE = 0;
 	public static JaneService instance;
+	public final static String JaneIntent = "jane.JaneIntent";
 
     private NotificationManager notificationManager;
 	private TextToSpeech tts;
@@ -73,31 +75,33 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 	protected Chat activeChat;
 	protected Map<String, Chat> chatCache;
+	
+	private BroadcastReceiver stateIntents = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if(intent.getAction().equals(JaneIntent)) {
+				Log.d("Jane", "Intent from JaneIntent: " + intent);
+				bluetoothConnected = false;
+				if (intent != null) {
+					if (intent.hasExtra("utterance_completed")) {
+						utteranceCompletedThreadsafe();
+					} else if (intent.hasExtra("start_listening")) {
+						listen();
+					} else if (intent.hasExtra("bluetooth_connected")) {
+						bluetoothConnected = intent.getExtras().getBoolean("bluetooth_connected");
+						listen();
+					} else if (intent.hasExtra("shutdown")) {
+						stopSelf();
+					}
+				}
+			}
+		}
+		
+	};
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-    	Log.d("Jane", "Intent from onStartCommand: " + intent);
-    	bluetoothConnected = false;
-    	if (intent != null) {
-    		if (intent.hasExtra("utterance_completed")) {
-        		utteranceCompletedThreadsafe();
-        		return START_STICKY;
-        	} else if (intent.hasExtra("start_listening")) {
-        		listen();
-        		return START_STICKY;
-        	} else if (intent.hasExtra("bluetooth_connected")) {
-        		bluetoothConnected = intent.getExtras().getBoolean("bluetooth_connected");
-        		listen();
-        		return START_STICKY;
-        	} else if (intent.hasExtra("shutdown")) {
-        		this.stopSelf();
-//        		TODO: unregister / sign out from smack. Otherwise, this error:
-//        		E/ActivityThread(21280): Service com.willwhitney.jane.JaneService has leaked IntentReceiver org.jivesoftware.smack.SmackAndroid$ConnectivtyChangedReceiver@4299f9a8 that was originally registered here. Are you missing a call to unregisterReceiver()?
-
-        	}
-    	}
-
     	instance = this;
         Log.i("Jane", "Received start id " + startId + ": " + intent);
         Log.d("Jane", "Service received start command.");
@@ -114,8 +118,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         // set up Bluetooth here
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         bt = new BluetoothState();
-        btAdapter.getProfileProxy(getApplicationContext(), bt, BluetoothProfile.HEADSET);
-        
+        btAdapter.getProfileProxy(getApplicationContext(), bt, BluetoothProfile.HEADSET);       
         
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
@@ -136,10 +139,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		chatCache = new HashMap<String, Chat>();
 
 		smack = org.jivesoftware.smack.SmackAndroid.init(this);
+		
+		this.registerReceiver(stateIntents, new IntentFilter(JaneIntent));
 
 		LoginThread login = new LoginThread(username, password, this);
 		login.start();
-
 
         return START_STICKY;
     }
@@ -285,9 +289,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     	Log.d("Jane", "Some utterance was completed with id " + utteranceId);
     	Log.d("Jane", "Passing this to utteranceCompletedThreadsafe...");
 
-    	Intent utteranceCompletedIntent = new Intent(this, JaneService.class);
+    	Intent utteranceCompletedIntent = new Intent(JaneIntent);
     	utteranceCompletedIntent.putExtra("utterance_completed", true);
-        startService(utteranceCompletedIntent);
+        sendBroadcast(utteranceCompletedIntent);
 	}
 
     public void utteranceCompletedThreadsafe() {
@@ -296,11 +300,9 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     
     private void waitForBluetooth() {
     	BluetoothHeadset hProxy = bt.getProxy();
-		if(hProxy.getConnectedDevices().size() > 0) {
-			BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
-			hProxy.stopVoiceRecognition(btDevice);
-			hProxy.startVoiceRecognition(btDevice);
-		}
+		BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
+		hProxy.stopVoiceRecognition(btDevice);
+		hProxy.startVoiceRecognition(btDevice);
     }
 
     public void listen() {
@@ -356,8 +358,6 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 			@Override
 			public void onBufferReceived(byte[] buffer) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
@@ -368,20 +368,14 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
 			@Override
 			public void onEvent(int eventType, Bundle params) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void onPartialResults(Bundle partialResults) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void onRmsChanged(float rmsdB) {
-				// TODO Auto-generated method stub
-
 			}
     	};
     	recognizer.setRecognitionListener(listener);
@@ -400,8 +394,25 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         btAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bt.getProxy());
         
         //close smack
-        connection.disconnect();
+        AsyncTask<Void, Void, Integer> smackShutdown = 
+        		new AsyncTask<Void, Void, Integer>() {
+
+			@Override
+			protected Integer doInBackground(Void... params) {
+				connection.disconnect();
+				return 1;
+			}
+        	
+        };
+        
+        smackShutdown.execute();
         smack.onDestroy();
+        
+        //unregister JaneIntent receiver
+        this.unregisterReceiver(stateIntents);
+        
+        //unregister tts
+        tts.shutdown();
 
         // Tell the user we stopped.
         Toast.makeText(this, "Jane service stopped.", Toast.LENGTH_SHORT).show();

@@ -71,9 +71,9 @@ public class Jane extends Activity {
 
 			@Override
 			public void onClick(View logoutButton) {
-				Intent stopJaneService = new Intent(Jane.this, JaneService.class);
+				Intent stopJaneService = new Intent(JaneService.JaneIntent);
 				stopJaneService.putExtra("shutdown", true);
-				startService(stopJaneService);
+				sendBroadcast(stopJaneService);
 
 				loginButton.setVisibility(View.VISIBLE);
 				logoutButton.setVisibility(View.GONE);
@@ -102,9 +102,9 @@ public class Jane extends Activity {
     }
 
     public void listen() {
-		Intent listenIntent = new Intent(Jane.this, JaneService.class);
+		Intent listenIntent = new Intent(JaneService.JaneIntent);
 		listenIntent.putExtra("start_listening", true);
-        startService(listenIntent);
+        sendBroadcast(listenIntent);
     }
 
     @Override

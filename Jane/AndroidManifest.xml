@@ -33,10 +33,7 @@
             android:label="Authenticate Foursquare" >           
         </activity>
         
-        <service android:name=".JaneService">    
-            <intent-filter>
-                <action android:name="jane.xmpp.NEW_MESSAGE" />
-            </intent-filter>        
+        <service android:name=".JaneService">           
         </service>
         
 		<receiver android:name="MediaButtonIntentReceiver">

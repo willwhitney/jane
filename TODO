@@ -3,14 +3,16 @@ BUGS
 -store Chat objects on target switch rather than discarding
 tweak behavior of pre-chat preface warning sent to contact
 blocking logic of messages received during input
+Jane does not speak when there is no headset
 
 FEATURES
-create a sign out button
+-create a sign out button
 	- Done (sort of shittily), but need to sign out of smack. Note in onStartCommand.
 		The logout logic should go in onDestroy.
-    logout leaks receivers
+    -logout leaks receivers
 -support bluetooth headset
 respond to bluetooth headset media button
+tie JaneIntent to permission
 
 POTENTIAL FEATURES
 filter for nonsensical statements
