@@ -1,6 +1,7 @@
 package com.willwhitney.jane;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
 import cc.gtank.bt.Bluetooth;
+import cc.gtank.bt.BluetoothState;
 import cc.gtank.bt.Gingertooth;
 import cc.gtank.bt.ModernBluetooth;
 
@@ -19,6 +21,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -50,7 +56,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     private NotificationManager notificationManager;
 	private TextToSpeech tts;
-	private Bluetooth bt;
+	private BluetoothState bt;
 
 	// Chat variables
 	public final static int LOGIN_FAILED = 0;
@@ -103,16 +109,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         tts.setOnUtteranceCompletedListener(this);
         
         // set up Bluetooth here
-        if(Build.VERSION.SDK_INT < 11) {
-        	bt = new Gingertooth(getApplicationContext());
-        } else {
-        	bt = new ModernBluetooth(getApplicationContext());
-        }
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        bt = new BluetoothState();
+        btAdapter.getProfileProxy(getApplicationContext(), bt, BluetoothProfile.HEADSET);
         
-        boolean bt_initialized = bt.initializeHeadset();
-        	
-        Log.d("Jane", "Initialized BTHeadset: " + bt_initialized);
-
+        
         AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ComponentName mediaButtonResponder = new ComponentName(getPackageName(), MediaButtonIntentReceiver.class.getName());
         am.registerMediaButtonEventReceiver(mediaButtonResponder);
@@ -291,9 +292,21 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     }
 
     public void listen() {
-    	
-    	bt.startVoiceRecognition();
 
+    	if(bt.getProxy() != null) {
+    		BluetoothHeadset hProxy = bt.getProxy();
+    		if(hProxy.getConnectedDevices().size() > 0) {
+    			BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
+    			hProxy.stopVoiceRecognition(btDevice);
+    			hProxy.startVoiceRecognition(btDevice);
+    			if(bt.getVoiceState() == BluetoothState.VOICE_STATE.CONNECTED) {
+    				Log.d("Jane", "Started BT voice recognition");
+    			} else {
+    				Log.d("Jane", "voice state " + bt.getVoiceState());
+    			}
+    		}
+    	}
+    	
     	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
     	intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
     	intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.willwhitney.jane");
@@ -303,7 +316,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     		@Override
     	    public void onResults(Bundle results) {
-    			bt.stopVoiceRecognition();
+    			if(bt.getProxy() != null) {
+    				BluetoothHeadset hProxy = bt.getProxy();
+    				BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
+    				bt.getProxy().stopVoiceRecognition(btDevice);    				
+    			}
     	        ArrayList<String> voiceResults = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
     	        if (voiceResults == null) {
     	            Log.e("Jane", "No voice results");
@@ -372,6 +389,10 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     public void onDestroy() {
         // Cancel the persistent notification.
         notificationManager.cancel(JANE_NOTIFICATION_CODE);
+        
+        //disconnect bluetooth proxy
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        btAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bt.getProxy());
 
         // Tell the user we stopped.
         Toast.makeText(this, "Jane service stopped.", Toast.LENGTH_SHORT).show();
