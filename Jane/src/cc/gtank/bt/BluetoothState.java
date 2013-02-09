@@ -49,7 +49,7 @@ public class BluetoothState extends BroadcastReceiver implements BluetoothProfil
 	}
 	
 	public boolean isAvailable() {
-		return bluetoothHeadset != null;
+		return bluetoothHeadset.getConnectedDevices().size() > 0;
 	}
 	
 	public BluetoothHeadset getProxy() {

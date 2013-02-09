@@ -304,6 +304,8 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     }
 
     public void listen() {
+    	
+    	Log.d("Jane", "BT available: " + bt.isAvailable());
 
     	if(bt.isAvailable() && !bluetoothConnected) {
     		waitForBluetooth();
@@ -398,7 +400,6 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         btAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bt.getProxy());
         
         //close smack
-        connection.getChatManager().removeChatListener(chatServiceListener);
         connection.disconnect();
         smack.onDestroy();
 
