@@ -1,5 +1,7 @@
 package cc.gtank.bt;
 
+import com.willwhitney.jane.JaneService;
+
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -37,11 +39,17 @@ public class BluetoothState extends BroadcastReceiver implements BluetoothProfil
 				state = VOICE_STATE.CONNECTING;
 			} else if(state.equals(BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
 				state = VOICE_STATE.CONNECTED;
-				//this.notify();
+				Intent jane = new Intent(context, JaneService.class);
+				jane.putExtra("bluetooth_connected", true);
+				context.startService(jane);
 			} else {
 				state = VOICE_STATE.DISCONNECTED;
 			}
 		}
+	}
+	
+	public boolean isAvailable() {
+		return bluetoothHeadset != null;
 	}
 	
 	public BluetoothHeadset getProxy() {

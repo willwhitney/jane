@@ -1,7 +1,6 @@
 package com.willwhitney.jane;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +8,15 @@ import java.util.Map;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.SmackAndroid;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 
-import cc.gtank.bt.Bluetooth;
 import cc.gtank.bt.BluetoothState;
 import cc.gtank.bt.Gingertooth;
-import cc.gtank.bt.ModernBluetooth;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -31,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -57,6 +53,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     private NotificationManager notificationManager;
 	private TextToSpeech tts;
 	private BluetoothState bt;
+	private boolean bluetoothConnected;
 
 	// Chat variables
 	public final static int LOGIN_FAILED = 0;
@@ -65,6 +62,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 	//public final static String NEW_CHAT = "jane.xmpp.NEW_CHAT";
 
 	private Messenger uiMessenger;
+	private SmackAndroid smack;
 	private XMPPConnection connection;
 
 	private ChatServiceListener chatServiceListener;
@@ -80,6 +78,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
     	Log.d("Jane", "Intent from onStartCommand: " + intent);
+    	bluetoothConnected = false;
     	if (intent != null) {
     		if (intent.hasExtra("utterance_completed")) {
         		utteranceCompletedThreadsafe();
@@ -87,8 +86,12 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         	} else if (intent.hasExtra("start_listening")) {
         		listen();
         		return START_STICKY;
+        	} else if (intent.hasExtra("bluetooth_connected")) {
+        		bluetoothConnected = intent.getExtras().getBoolean("bluetooth_connected");
+        		listen();
+        		return START_STICKY;
         	} else if (intent.hasExtra("shutdown")) {
-//        		this.stopSelf();
+        		this.stopSelf();
 //        		TODO: unregister / sign out from smack. Otherwise, this error:
 //        		E/ActivityThread(21280): Service com.willwhitney.jane.JaneService has leaked IntentReceiver org.jivesoftware.smack.SmackAndroid$ConnectivtyChangedReceiver@4299f9a8 that was originally registered here. Are you missing a call to unregisterReceiver()?
 
@@ -132,7 +135,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 		nameCache = new HashMap<String, String>();
 		chatCache = new HashMap<String, Chat>();
 
-		org.jivesoftware.smack.SmackAndroid.init(this);
+		smack = org.jivesoftware.smack.SmackAndroid.init(this);
 
 		LoginThread login = new LoginThread(username, password, this);
 		login.start();
@@ -290,21 +293,21 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
     public void utteranceCompletedThreadsafe() {
     	Log.d("Jane", "Received startService in utteranceCompletedThreadsafe");
     }
+    
+    private void waitForBluetooth() {
+    	BluetoothHeadset hProxy = bt.getProxy();
+		if(hProxy.getConnectedDevices().size() > 0) {
+			BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
+			hProxy.stopVoiceRecognition(btDevice);
+			hProxy.startVoiceRecognition(btDevice);
+		}
+    }
 
     public void listen() {
 
-    	if(bt.getProxy() != null) {
-    		BluetoothHeadset hProxy = bt.getProxy();
-    		if(hProxy.getConnectedDevices().size() > 0) {
-    			BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
-    			hProxy.stopVoiceRecognition(btDevice);
-    			hProxy.startVoiceRecognition(btDevice);
-    			if(bt.getVoiceState() == BluetoothState.VOICE_STATE.CONNECTED) {
-    				Log.d("Jane", "Started BT voice recognition");
-    			} else {
-    				Log.d("Jane", "voice state " + bt.getVoiceState());
-    			}
-    		}
+    	if(bt.isAvailable() && !bluetoothConnected) {
+    		waitForBluetooth();
+    		return;
     	}
     	
     	Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -316,7 +319,7 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
 
     		@Override
     	    public void onResults(Bundle results) {
-    			if(bt.getProxy() != null) {
+    			if(bt.isAvailable()) {
     				BluetoothHeadset hProxy = bt.getProxy();
     				BluetoothDevice btDevice = hProxy.getConnectedDevices().get(0);
     				bt.getProxy().stopVoiceRecognition(btDevice);    				
@@ -393,6 +396,11 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
         //disconnect bluetooth proxy
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         btAdapter.closeProfileProxy(BluetoothProfile.HEADSET, bt.getProxy());
+        
+        //close smack
+        connection.getChatManager().removeChatListener(chatServiceListener);
+        connection.disconnect();
+        smack.onDestroy();
 
         // Tell the user we stopped.
         Toast.makeText(this, "Jane service stopped.", Toast.LENGTH_SHORT).show();
@@ -404,13 +412,13 @@ public class JaneService extends Service implements OnUtteranceCompletedListener
      */
     private void showNotification() {
     	//TODO: this fixes a crash on 2.3.3 but is not correct behavior
-    	Intent dummyIntent = new Intent(this, Jane.class);
-    	PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, dummyIntent, 0);
+    	//Intent dummyIntent = new Intent(this, Jane.class);
+    	//PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, dummyIntent, 0);
         Notification notification = new NotificationCompat.Builder(this)
         		.setSmallIcon(R.drawable.ic_launcher)
         		.setContentTitle("Jane")
         		.setContentText("Ready and waiting.")
-        		.setContentIntent(contentIntent)
+        		//.setContentIntent(contentIntent)
         		.setOngoing(true)
         		.build();
 

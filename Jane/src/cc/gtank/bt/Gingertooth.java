@@ -13,7 +13,7 @@ import android.os.Build;
 import android.util.Log;
 
 @TargetApi(Build.VERSION_CODES.GINGERBREAD)
-public class Gingertooth implements Bluetooth {
+public class Gingertooth {
 	
 	private Context context;
 	private Object btHeadset;
@@ -24,7 +24,7 @@ public class Gingertooth implements Bluetooth {
 		connected = false;
 	}
 
-	@Override
+	
 	public boolean initializeHeadset() {
 		if(Build.VERSION.SDK_INT == 10) {
 			try {
@@ -57,7 +57,7 @@ public class Gingertooth implements Bluetooth {
 		}
 	}
 
-	@Override
+	
 	public boolean startVoiceRecognition() {
 		if(connected) {
 			try {
@@ -74,7 +74,7 @@ public class Gingertooth implements Bluetooth {
 		}
 	}
 
-	@Override
+	
 	public boolean stopVoiceRecognition() {
 		if(connected) {
 			try {
